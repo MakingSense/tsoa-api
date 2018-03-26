@@ -1,4 +1,4 @@
-import { Route, Controller, Get, Put, Post, Delete, Security, Query, Body } from 'tsoa';
+import { Route, Controller, Get, Put, Post, Delete, Security, Query, Body, Response } from 'tsoa';
 
 import { ProvideSingleton, inject } from '../ioc';
 import { IUserModel, UserModel, PaginationModel } from '../models';
@@ -25,6 +25,7 @@ export class UserController extends Controller {
     return this.userService.getPaginated(safeParse(query, {}), pageNumber, perPage);
   }
 
+  @Response(400, 'Bad request')
   @Post()
   @Security('adminUser')
   public async create(@Body() userParams: IUserModel): Promise<IUserModel> {
@@ -32,6 +33,7 @@ export class UserController extends Controller {
     return this.userService.create(user);
   }
 
+  @Response(400, 'Bad request')
   @Put('{id}')
   @Security('adminUser')
   public async update(id: string, @Body() userParams: IUserModel): Promise<{ count: number }> {

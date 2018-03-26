@@ -201,6 +201,9 @@
 						"schema": {
 							"$ref": "#/definitions/IUserModel"
 						}
+					},
+					"400": {
+						"description": "Bad request"
 					}
 				},
 				"security": [
