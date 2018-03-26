@@ -2,8 +2,8 @@ import { ProvideSingleton, inject } from '../ioc';
 import { UserModel, IUserModel, PaginationModel } from '../models';
 import { UserRepository } from '../repositories';
 
-@ProvideSingleton(GetUserUseCase)
-export class GetUserUseCase {
+@ProvideSingleton(UserService)
+export class UserService {
 
   constructor(@inject(UserRepository) private userRepository: UserRepository) { }
 
@@ -23,5 +23,19 @@ export class GetUserUseCase {
       perPage,
       list: list.map(item => new UserModel(item))
     });
+  }
+
+  public async create(user: IUserModel): Promise<IUserModel> {
+    delete user.id;
+    return new UserModel(await this.userRepository.create(user));
+  }
+
+  public async update(id: string, user: IUserModel): Promise<{ count: number }> {
+    delete user.id;
+    return { count: (await this.userRepository.update(id, user)).ok };
+  }
+
+  public async delete(id: string): Promise<void> {
+    return this.userRepository.delete(id);
   }
 }
