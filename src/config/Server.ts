@@ -4,14 +4,15 @@ import * as bodyParser from 'body-parser';
 import * as winston from 'winston';
 import * as expressWinston from 'express-winston';
 
+import constants from './constants';
 import { ErrorHandler } from './ErrorHandler';
 import { RegisterRoutes } from '../../build/routes';
 import { Logger } from './Logger';
 import '../controllers';
-
+console.log('constants', constants)
 export class Server {
   public app: express.Express = express();
-  private readonly port: number = 3030;
+  private readonly port: number = constants.port;
 
   constructor() {
     this.app.use(this.allowCors);
