@@ -13,8 +13,11 @@ describe('GetItemsUseCase', () => {
   });
 
   it('should find many', async () => {
-    const results = await useCase.find('');
-    expect(results.length).to.be.greaterThan(0);
+    const results = await useCase.getPaginated({} as any, 1, 5);
+    expect(results.count).to.be.greaterThan(0);
+    expect(results.list.length).to.be.greaterThan(0);
+    expect(results.pageNumber).to.equal(1);
+    expect(results.perPage).to.equal(5);
   });
 
   it('should get by id', async () => {

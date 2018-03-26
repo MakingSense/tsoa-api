@@ -39,7 +39,7 @@ export class UserRepository {
     return this.model.findOne(cleanQuery(query));
   }
 
-  public async count(query: any): Promise<number> {
+  public async count(query: IUserModel): Promise<number> {
     return this.model.count(cleanQuery(query));
   }
 }
