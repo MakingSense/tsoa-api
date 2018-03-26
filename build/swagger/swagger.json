@@ -4,20 +4,18 @@
 		"application/json"
 	],
 	"definitions": {
-		"UserModel": {
+		"IUserModel": {
 			"properties": {
 				"id": {
 					"type": "string"
 				},
 				"name": {
 					"type": "string"
-				},
-				"args": {
-					"type": "object"
 				}
 			},
 			"required": [
-				"args"
+				"id",
+				"name"
 			],
 			"type": "object"
 		}
@@ -40,7 +38,7 @@
 					"200": {
 						"description": "Ok",
 						"schema": {
-							"$ref": "#/definitions/UserModel"
+							"$ref": "#/definitions/IUserModel"
 						}
 					}
 				},
@@ -67,7 +65,7 @@
 						"schema": {
 							"type": "array",
 							"items": {
-								"$ref": "#/definitions/UserModel"
+								"$ref": "#/definitions/IUserModel"
 							}
 						}
 					}

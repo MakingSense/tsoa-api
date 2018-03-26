@@ -1,5 +1,5 @@
 import { ProvideSingleton, inject } from '../ioc';
-import { UserModel } from '../models';
+import { IUserModel } from '../models';
 import { UserRepository } from '../repositories';
 
 @ProvideSingleton(GetUserUseCase)
@@ -7,11 +7,11 @@ export class GetUserUseCase {
 
   constructor(@inject(UserRepository) private userRepository: UserRepository) { }
 
-  public async getById(id: string): Promise<UserModel> {
+  public async getById(id: string): Promise<IUserModel> {
     return this.userRepository.findOne(id);
   }
 
-  public async find(query: string): Promise<UserModel[]> {
+  public async find(query: string): Promise<IUserModel[]> {
     return this.userRepository.find(query);
   }
 }

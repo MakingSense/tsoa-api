@@ -1,7 +1,7 @@
 import { Route, Controller, Get, Put, Post, Delete, Security, Query, Body } from 'tsoa';
 
 import { ProvideSingleton, inject } from '../ioc';
-import { UserModel } from '../models';
+import { IUserModel } from '../models';
 import { GetUserUseCase } from '../useCases';
 
 @Route('user')
@@ -13,12 +13,12 @@ export class UserController extends Controller {
   }
 
   @Get('{id}')
-  public async getById(id: string): Promise<UserModel> {
+  public async getById(id: string): Promise<IUserModel> {
     return this.getUserUseCase.getById(id);
   }
 
   @Get()
-  public async get(@Query('search') search: string): Promise<UserModel[]> {
+  public async get(@Query('search') search: string): Promise<IUserModel[]> {
     return this.getUserUseCase.find(search);
   }
 }

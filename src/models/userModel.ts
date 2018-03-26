@@ -1,4 +1,9 @@
-export class UserModel {
+export interface IUserModel {
+  id: string;
+  name: string;
+}
+
+export class UserModel implements IUserModel {
   public id: string = null;
   public name: string = null;
 

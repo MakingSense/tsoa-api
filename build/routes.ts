@@ -6,11 +6,10 @@ import { PingController } from './../src/controllers/PingController';
 import { expressAuthentication } from './../src/auth';
 
 const models: TsoaRoute.Models = {
-    "UserModel": {
+    "IUserModel": {
         "properties": {
-            "id": { "dataType": "string" },
-            "name": { "dataType": "string" },
-            "args": { "dataType": "any", "required": true },
+            "id": { "dataType": "string", "required": true },
+            "name": { "dataType": "string", "required": true },
         },
     },
 };
