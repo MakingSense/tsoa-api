@@ -1,0 +1,14 @@
+{
+  "swagger": {
+    "entryFile": "./build/routes.ts",
+    "outputDirectory": "./build/swagger"
+  },
+  "routes": {
+    "entryFile": "./src/controllers/index.ts",
+    "routesDir": "./build",
+    "basePath": "/api/",
+    "authenticationModule": "./src/auth.ts",
+    "middleware": "express",
+    "iocModule": "./src/ioc"
+  }
+}

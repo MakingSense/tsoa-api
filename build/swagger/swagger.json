@@ -1,0 +1,110 @@
+{
+	"basePath": "",
+	"consumes": [
+		"application/json"
+	],
+	"definitions": {
+		"UserModel": {
+			"properties": {
+				"id": {
+					"type": "string"
+				},
+				"name": {
+					"type": "string"
+				},
+				"args": {
+					"type": "object"
+				}
+			},
+			"required": [
+				"args"
+			],
+			"type": "object"
+		}
+	},
+	"info": {
+		"title": "express-swagger-api",
+		"version": "1.0.0",
+		"license": {
+			"name": "ISC"
+		}
+	},
+	"paths": {
+		"/user/{id}": {
+			"get": {
+				"operationId": "GetById",
+				"produces": [
+					"application/json"
+				],
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"schema": {
+							"$ref": "#/definitions/UserModel"
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"type": "string"
+					}
+				]
+			}
+		},
+		"/user": {
+			"get": {
+				"operationId": "Get",
+				"produces": [
+					"application/json"
+				],
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"schema": {
+							"type": "array",
+							"items": {
+								"$ref": "#/definitions/UserModel"
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "search",
+						"required": true,
+						"type": "string"
+					}
+				]
+			}
+		},
+		"/ping": {
+			"get": {
+				"operationId": "Ping",
+				"produces": [
+					"application/json"
+				],
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"schema": {
+							"type": "string"
+						}
+					}
+				},
+				"security": [],
+				"parameters": []
+			}
+		}
+	},
+	"produces": [
+		"application/json"
+	],
+	"swagger": "2.0",
+	"securityDefinitions": {}
+}
