@@ -9,7 +9,6 @@ import { ErrorHandler } from './ErrorHandler';
 import { RegisterRoutes } from '../../build/routes';
 import { Logger } from './Logger';
 import '../controllers';
-console.log('constants', constants)
 export class Server {
   public app: express.Express = express();
   private readonly port: number = constants.port;
