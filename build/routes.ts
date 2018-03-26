@@ -8,8 +8,19 @@ import { expressAuthentication } from './../src/auth';
 const models: TsoaRoute.Models = {
     "IUserModel": {
         "properties": {
-            "id": { "dataType": "string", "required": true },
-            "name": { "dataType": "string", "required": true },
+            "id": { "dataType": "string" },
+            "username": { "dataType": "string", "required": true },
+            "firstName": { "dataType": "string", "required": true },
+            "lastName": { "dataType": "string", "required": true },
+        },
+    },
+    "PaginationModel": {
+        "properties": {
+            "count": { "dataType": "double", "required": true },
+            "pageNumber": { "dataType": "double", "required": true },
+            "perPage": { "dataType": "double", "required": true },
+            "list": { "dataType": "array", "array": { "dataType": "any" }, "required": true },
+            "args": { "ref": "PaginationModel", "required": true },
         },
     },
 };
@@ -40,7 +51,9 @@ export function RegisterRoutes(app: any) {
     app.get('/api/user',
         function(request: any, response: any, next: any) {
             const args = {
-                search: { "in": "query", "name": "search", "required": true, "dataType": "string" },
+                query: { "in": "query", "name": "query", "required": true, "dataType": "string" },
+                pageNumber: { "in": "query", "name": "pageNumber", "required": true, "dataType": "double" },
+                perPage: { "in": "query", "name": "perPage", "required": true, "dataType": "double" },
             };
 
             let validatedArgs: any[] = [];
@@ -56,7 +69,77 @@ export function RegisterRoutes(app: any) {
             }
 
 
-            const promise = controller.get.apply(controller, validatedArgs);
+            const promise = controller.getPaginated.apply(controller, validatedArgs);
+            promiseHandler(controller, promise, response, next);
+        });
+    app.post('/api/user',
+        authenticateMiddleware([{ "name": "adminUser" }]),
+        function(request: any, response: any, next: any) {
+            const args = {
+                userParams: { "in": "body", "name": "userParams", "required": true, "ref": "IUserModel" },
+            };
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request);
+            } catch (err) {
+                return next(err);
+            }
+
+            const controller = iocContainer.get<UserController>(UserController);
+            if (typeof controller['setStatus'] === 'function') {
+                (<any>controller).setStatus(undefined);
+            }
+
+
+            const promise = controller.create.apply(controller, validatedArgs);
+            promiseHandler(controller, promise, response, next);
+        });
+    app.put('/api/user/:id',
+        authenticateMiddleware([{ "name": "adminUser" }]),
+        function(request: any, response: any, next: any) {
+            const args = {
+                id: { "in": "path", "name": "id", "required": true, "dataType": "string" },
+                userParams: { "in": "body", "name": "userParams", "required": true, "ref": "IUserModel" },
+            };
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request);
+            } catch (err) {
+                return next(err);
+            }
+
+            const controller = iocContainer.get<UserController>(UserController);
+            if (typeof controller['setStatus'] === 'function') {
+                (<any>controller).setStatus(undefined);
+            }
+
+
+            const promise = controller.update.apply(controller, validatedArgs);
+            promiseHandler(controller, promise, response, next);
+        });
+    app.delete('/api/user/:id',
+        authenticateMiddleware([{ "name": "adminUser" }]),
+        function(request: any, response: any, next: any) {
+            const args = {
+                id: { "in": "path", "name": "id", "required": true, "dataType": "string" },
+            };
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request);
+            } catch (err) {
+                return next(err);
+            }
+
+            const controller = iocContainer.get<UserController>(UserController);
+            if (typeof controller['setStatus'] === 'function') {
+                (<any>controller).setStatus(undefined);
+            }
+
+
+            const promise = controller.delete.apply(controller, validatedArgs);
             promiseHandler(controller, promise, response, next);
         });
     app.get('/api/ping',
@@ -81,6 +164,30 @@ export function RegisterRoutes(app: any) {
             promiseHandler(controller, promise, response, next);
         });
 
+    function authenticateMiddleware(security: TsoaRoute.Security[] = []) {
+        return (request: any, response: any, next: any) => {
+            let responded = 0;
+            let success = false;
+            for (const secMethod of security) {
+                expressAuthentication(request, secMethod.name, secMethod.scopes).then((user: any) => {
+                    // only need to respond once
+                    if (!success) {
+                        success = true;
+                        responded++;
+                        request['user'] = user;
+                        next();
+                    }
+                })
+                    .catch((error: any) => {
+                        responded++;
+                        if (responded == security.length && !success) {
+                            response.status(401);
+                            next(error)
+                        }
+                    })
+            }
+        }
+    }
 
     function promiseHandler(controllerObj: any, promise: any, response: any, next: any) {
         return Promise.resolve(promise)

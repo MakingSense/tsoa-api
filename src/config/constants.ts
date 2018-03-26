@@ -6,5 +6,6 @@ config({ path: pathResolve(__dirname, `./env/.env.${env.NODE_ENV}`) });
 
 export default {
   environment: env.NODE_ENV,
-  port: Number(env.PORT)
+  port: Number(env.PORT),
+  mongoConnectionString: env.MONGO_CONNECTION_STRING
 }

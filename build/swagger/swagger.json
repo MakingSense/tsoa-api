@@ -9,13 +9,53 @@
 				"id": {
 					"type": "string"
 				},
-				"name": {
+				"username": {
+					"type": "string"
+				},
+				"firstName": {
+					"type": "string"
+				},
+				"lastName": {
 					"type": "string"
 				}
 			},
 			"required": [
-				"id",
-				"name"
+				"username",
+				"firstName",
+				"lastName"
+			],
+			"type": "object"
+		},
+		"PaginationModel": {
+			"properties": {
+				"count": {
+					"type": "number",
+					"format": "double"
+				},
+				"pageNumber": {
+					"type": "number",
+					"format": "double"
+				},
+				"perPage": {
+					"type": "number",
+					"format": "double"
+				},
+				"list": {
+					"type": "array",
+					"items": {
+						"type": "object"
+					}
+				},
+				"args": {
+					"$ref": "#/definitions/PaginationModel"
+				}
+			},
+			"required": [
+				"count",
+				"pageNumber",
+				"perPage",
+				"list",
+				"args"
 			],
 			"type": "object"
 		}
@@ -51,11 +91,9 @@
 						"type": "string"
 					}
 				]
-			}
-		},
-		"/user": {
-			"get": {
-				"operationId": "Get",
+			},
+			"put": {
+				"operationId": "Update",
 				"produces": [
 					"application/json"
 				],
@@ -63,10 +101,68 @@
 					"200": {
 						"description": "Ok",
 						"schema": {
-							"type": "array",
-							"items": {
-								"$ref": "#/definitions/IUserModel"
-							}
+							"type": "object"
+						}
+					}
+				},
+				"security": [
+					{
+						"adminUser": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"type": "string"
+					},
+					{
+						"in": "body",
+						"name": "userParams",
+						"required": true,
+						"schema": {
+							"$ref": "#/definitions/IUserModel"
+						}
+					}
+				]
+			},
+			"delete": {
+				"operationId": "Delete",
+				"produces": [
+					"application/json"
+				],
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"security": [
+					{
+						"adminUser": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"type": "string"
+					}
+				]
+			}
+		},
+		"/user": {
+			"get": {
+				"operationId": "GetPaginated",
+				"produces": [
+					"application/json"
+				],
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"schema": {
+							"$ref": "#/definitions/PaginationModel"
 						}
 					}
 				},
@@ -74,9 +170,52 @@
 				"parameters": [
 					{
 						"in": "query",
-						"name": "search",
+						"name": "query",
 						"required": true,
 						"type": "string"
+					},
+					{
+						"in": "query",
+						"name": "pageNumber",
+						"required": true,
+						"format": "double",
+						"type": "number"
+					},
+					{
+						"in": "query",
+						"name": "perPage",
+						"required": true,
+						"format": "double",
+						"type": "number"
+					}
+				]
+			},
+			"post": {
+				"operationId": "Create",
+				"produces": [
+					"application/json"
+				],
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"schema": {
+							"$ref": "#/definitions/IUserModel"
+						}
+					}
+				},
+				"security": [
+					{
+						"adminUser": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "body",
+						"name": "userParams",
+						"required": true,
+						"schema": {
+							"$ref": "#/definitions/IUserModel"
+						}
 					}
 				]
 			}
