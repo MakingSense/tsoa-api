@@ -1,4 +1,5 @@
 import * as express from 'express';
+import * as swaggerUi from 'swagger-ui-express';
 import * as bodyParser from 'body-parser';
 import * as winston from 'winston';
 import * as expressWinston from 'express-winston';
@@ -19,6 +20,10 @@ export class Server {
     this.app.use(expressWinston.logger({ transports: [new winston.transports.Console({ colorize: true })] }));
     RegisterRoutes(this.app);
     this.app.use(ErrorHandler.handleError);
+
+    const swaggerDocument = require('../../build/swagger/swagger.json');
+
+    this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
   }
 
   public listen(port: number = this.port): void {
@@ -26,7 +31,7 @@ export class Server {
     Logger.log(`listening to port: ${this.port}`);
   }
 
-  private allowCors (req: express.Request, res: express.Response, next: express.NextFunction): void {
+  private allowCors(req: express.Request, res: express.Response, next: express.NextFunction): void {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
     next();

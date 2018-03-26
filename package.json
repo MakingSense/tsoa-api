@@ -8,7 +8,7 @@
     "start": "yarn start:dev",
     "start:dev": "yarn build:routes && yarn build:swagger && ts-node-dev --respawn ./src",
     "build:routes": "tsoa routes",
-    "build:swagger": "tsoa swagger",
+    "build:swagger": "tsoa swagger --basePath /api",
     "build": "yarn build:routes && yarn build:swagger"
   },
   "author": "dgeslin",
@@ -21,6 +21,7 @@
     "mongoose": "^5.0.6",
     "reflect-metadata": "^0.1.12",
     "requestify": "^0.2.5",
+    "swagger-ui-express": "^3.0.6",
     "tsoa": "^2.1.1",
     "winston": "^2.4.0"
   },
