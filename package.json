@@ -11,6 +11,7 @@
     "build:routes": "tsoa routes",
     "build:swagger": "tsoa swagger --basePath /api",
     "build:prod": "yarn clean && yarn build:routes && yarn build:swagger && tsc && yarn copy",
+    "build": "yarn build:prod",
     "clean": "rimraf ./dist",
     "copy": "yarn copy:swagger && yarn copy:env",
     "copy:swagger": "cp -R ./build/swagger ./dist/build/swagger",
