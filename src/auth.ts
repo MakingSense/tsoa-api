@@ -1,5 +1,6 @@
 import { Request } from 'express';
 
+import constants from './config/constants';
 import { ApiError } from './config/ErrorHandler';
 
 export type res = { status: number; message: string };
@@ -9,5 +10,5 @@ export async function expressAuthentication(request: Request, securityName: stri
     case 'adminUser':
       return null; /** everyone is an admin now :D */
   }
-  throw new ApiError('auth', 403, 'invalid credentials');
+  throw new ApiError(constants.errorTypes.auth);
 }

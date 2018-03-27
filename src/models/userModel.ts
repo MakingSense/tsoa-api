@@ -1,3 +1,6 @@
+import constants from '../config/constants';
+import { ApiError } from '../config/ErrorHandler';
+
 export interface IUserModel {
   id?: string;
   username: string;
@@ -12,7 +15,7 @@ export class UserModel implements IUserModel {
   public lastName: string = null;
 
   constructor(args: any) {
-    if (!args) throw new Error('no data');
+    if (!args) throw new ApiError(constants.errorTypes.entity);
     Object.keys(this).forEach(key => {
       if (args[key] !== undefined) this[key] = args[key];
     });
