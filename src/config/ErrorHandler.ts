@@ -1,22 +1,49 @@
 import { Request, Response, NextFunction } from 'express';
 
+import constants from './constants';
 import { Logger } from './Logger';
 
-export class ApiError extends Error {
-  public statusCode: number;
+export interface ErrorType {
+  statusCode: number;
+  name: string;
+  message: string;
+  fields?: { [field: string]: { message: string } };
+}
 
-  constructor(name: string, statusCode: number, message?: string) {
-    super(message);
-    this.name = name;
-    this.statusCode = statusCode;
+export class ApiError extends Error implements ErrorType {
+  public statusCode: number = 500;
+  public fields?: { [field: string]: { message: string } };
+
+  constructor(errorType: ErrorType) {
+    super(errorType.message);
+    this.name = errorType.name;
+    this.statusCode = errorType.statusCode;
+    this.fields = errorType.fields;
   }
 }
 
 export class ErrorHandler {
   public static handleError(error: ApiError, req: Request, res: Response, next: NextFunction): void {
-    const { name = 'InternalServerError', message = 'error', statusCode = 500 } = error;
-    Logger.error(`Error: ${name}:`, message, error);
-    res.status(statusCode).json({ name, message })
+    const normalizedError: ApiError = ErrorHandler.normalizeError(error);
+    const { name, message, fields, statusCode } = normalizedError;
+    Logger.error(
+      `Error: ${statusCode}`,
+      `Error Name: ${name}`,
+      `Error Message: ${message}`,
+      `Error Fields:`, fields || {});
+    res.status(statusCode).json({ name, message, fields })
     next();
+  }
+
+  private static normalizeError(error: ApiError): ApiError {
+    const normalizedError: ApiError = new ApiError(error);
+    Object.keys(constants.errorMap).forEach(errorKey => {
+      if (errorKey === normalizedError.name) Object.assign(normalizedError, constants.errorMap[errorKey]);
+    });
+    Object.keys(constants.errorTypes).forEach(errorTypeKey => {
+      const errorType = constants.errorTypes[errorTypeKey];
+      if (errorType.statusCode === normalizedError.statusCode) normalizedError.name = errorType.name;
+    });
+    return normalizedError;
   }
 }

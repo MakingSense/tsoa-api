@@ -8,7 +8,12 @@
     "noImplicitReturns": true,
     "noImplicitAny": false,
     "preserveConstEnums": true,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "outDir": "./dist",
+    "rootDirs": [
+      "./src",
+      "./build"
+    ]
   },
   "exclude": [
     "logs",
