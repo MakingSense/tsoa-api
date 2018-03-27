@@ -4,9 +4,7 @@ import { UserService } from '../../services';
 import { UserModel } from '../../models';
 import { MockUserRepository } from '../mocks/mockUserRepository'
 
-// if you used the '@types/mocha' method to install mocha type definitions, uncomment the following line
-// import 'mocha';
-describe('GetItemsUseCase', () => {
+describe('UserService', () => {
   let service: UserService;
   beforeEach(() => {
     service = new UserService(new MockUserRepository() as any);

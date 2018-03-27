@@ -12,7 +12,7 @@ export class UserModel implements IUserModel {
   public lastName: string = null;
 
   constructor(args: any) {
-    if (!args) throw new Error(`${UserModel.name}'s args are missing`);
+    if (!args) throw new Error('no data');
     Object.keys(this).forEach(key => {
       if (args[key] !== undefined) this[key] = args[key];
     });

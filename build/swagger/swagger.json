@@ -61,7 +61,7 @@
 		}
 	},
 	"info": {
-		"title": "express-swagger-api",
+		"title": "tsoa-api",
 		"version": "1.0.0",
 		"license": {
 			"name": "ISC"
@@ -103,6 +103,9 @@
 						"schema": {
 							"type": "object"
 						}
+					},
+					"400": {
+						"description": "Bad request"
 					}
 				},
 				"security": [
