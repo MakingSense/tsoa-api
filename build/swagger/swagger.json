@@ -1,61 +1,61 @@
 {
-	"basePath": "/api",
+	"basePath": "/service",
 	"consumes": [
 		"application/json"
 	],
 	"definitions": {
 		"IUserModel": {
 			"properties": {
+				"_id": {
+					"type": "string"
+				},
 				"id": {
 					"type": "string"
 				},
-				"username": {
+				"email": {
 					"type": "string"
 				},
-				"firstName": {
-					"type": "string"
-				},
-				"lastName": {
+				"name": {
 					"type": "string"
 				}
 			},
 			"required": [
-				"username",
-				"firstName",
-				"lastName"
+				"email",
+				"name"
 			],
 			"type": "object"
 		},
-		"PaginationModel": {
+		"IPaginationModel": {
 			"properties": {
 				"count": {
 					"type": "number",
 					"format": "double"
 				},
-				"pageNumber": {
+				"page": {
 					"type": "number",
 					"format": "double"
 				},
-				"perPage": {
+				"limit": {
 					"type": "number",
 					"format": "double"
 				},
-				"list": {
+				"totalPages": {
+					"type": "number",
+					"format": "double"
+				},
+				"docs": {
 					"type": "array",
 					"items": {
 						"type": "object"
 					}
-				},
-				"args": {
-					"$ref": "#/definitions/PaginationModel"
 				}
 			},
 			"required": [
 				"count",
-				"pageNumber",
-				"perPage",
-				"list",
-				"args"
+				"page",
+				"limit",
+				"totalPages",
+				"docs"
 			],
 			"type": "object"
 		}
@@ -68,7 +68,7 @@
 		}
 	},
 	"paths": {
-		"/user/{id}": {
+		"/users/{id}": {
 			"get": {
 				"operationId": "GetById",
 				"produces": [
@@ -82,6 +82,9 @@
 						}
 					}
 				},
+				"tags": [
+					"users"
+				],
 				"security": [],
 				"parameters": [
 					{
@@ -101,16 +104,19 @@
 					"200": {
 						"description": "Ok",
 						"schema": {
-							"type": "object"
+							"$ref": "#/definitions/IUserModel"
 						}
 					},
 					"400": {
 						"description": "Bad request"
 					}
 				},
+				"tags": [
+					"users"
+				],
 				"security": [
 					{
-						"adminUser": []
+						"admin": []
 					}
 				],
 				"parameters": [
@@ -122,7 +128,7 @@
 					},
 					{
 						"in": "body",
-						"name": "userParams",
+						"name": "body",
 						"required": true,
 						"schema": {
 							"$ref": "#/definitions/IUserModel"
@@ -140,9 +146,12 @@
 						"description": "No content"
 					}
 				},
+				"tags": [
+					"users"
+				],
 				"security": [
 					{
-						"adminUser": []
+						"admin": []
 					}
 				],
 				"parameters": [
@@ -155,7 +164,7 @@
 				]
 			}
 		},
-		"/user": {
+		"/users": {
 			"get": {
 				"operationId": "GetPaginated",
 				"produces": [
@@ -165,31 +174,46 @@
 					"200": {
 						"description": "Ok",
 						"schema": {
-							"$ref": "#/definitions/PaginationModel"
+							"$ref": "#/definitions/IPaginationModel"
 						}
 					}
 				},
+				"tags": [
+					"users"
+				],
 				"security": [],
 				"parameters": [
 					{
 						"in": "query",
-						"name": "query",
+						"name": "page",
 						"required": true,
+						"format": "double",
+						"type": "number"
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": true,
+						"format": "double",
+						"type": "number"
+					},
+					{
+						"in": "query",
+						"name": "fields",
+						"required": false,
 						"type": "string"
 					},
 					{
 						"in": "query",
-						"name": "pageNumber",
-						"required": true,
-						"format": "double",
-						"type": "number"
+						"name": "sort",
+						"required": false,
+						"type": "string"
 					},
 					{
 						"in": "query",
-						"name": "perPage",
-						"required": true,
-						"format": "double",
-						"type": "number"
+						"name": "q",
+						"required": false,
+						"type": "string"
 					}
 				]
 			},
@@ -209,39 +233,24 @@
 						"description": "Bad request"
 					}
 				},
+				"tags": [
+					"users"
+				],
 				"security": [
 					{
-						"adminUser": []
+						"admin": []
 					}
 				],
 				"parameters": [
 					{
 						"in": "body",
-						"name": "userParams",
+						"name": "body",
 						"required": true,
 						"schema": {
 							"$ref": "#/definitions/IUserModel"
 						}
 					}
 				]
-			}
-		},
-		"/ping": {
-			"get": {
-				"operationId": "Ping",
-				"produces": [
-					"application/json"
-				],
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"schema": {
-							"type": "string"
-						}
-					}
-				},
-				"security": [],
-				"parameters": []
 			}
 		}
 	},

@@ -2,31 +2,30 @@
 import { Controller, ValidateParam, FieldErrors, ValidateError, TsoaRoute } from 'tsoa';
 import { iocContainer } from './../src/ioc';
 import { UserController } from './../src/controllers/UserController';
-import { PingController } from './../src/controllers/PingController';
 import { expressAuthentication } from './../src/auth';
 
 const models: TsoaRoute.Models = {
     "IUserModel": {
         "properties": {
+            "_id": { "dataType": "string" },
             "id": { "dataType": "string" },
-            "username": { "dataType": "string", "required": true },
-            "firstName": { "dataType": "string", "required": true },
-            "lastName": { "dataType": "string", "required": true },
+            "email": { "dataType": "string", "required": true },
+            "name": { "dataType": "string", "required": true },
         },
     },
-    "PaginationModel": {
+    "IPaginationModel": {
         "properties": {
             "count": { "dataType": "double", "required": true },
-            "pageNumber": { "dataType": "double", "required": true },
-            "perPage": { "dataType": "double", "required": true },
-            "list": { "dataType": "array", "array": { "dataType": "any" }, "required": true },
-            "args": { "ref": "PaginationModel", "required": true },
+            "page": { "dataType": "double", "required": true },
+            "limit": { "dataType": "double", "required": true },
+            "totalPages": { "dataType": "double", "required": true },
+            "docs": { "dataType": "array", "array": { "dataType": "any" }, "required": true },
         },
     },
 };
 
 export function RegisterRoutes(app: any) {
-    app.get('/api/user/:id',
+    app.get('/service/users/:id',
         function(request: any, response: any, next: any) {
             const args = {
                 id: { "in": "path", "name": "id", "required": true, "dataType": "string" },
@@ -48,12 +47,14 @@ export function RegisterRoutes(app: any) {
             const promise = controller.getById.apply(controller, validatedArgs);
             promiseHandler(controller, promise, response, next);
         });
-    app.get('/api/user',
+    app.get('/service/users',
         function(request: any, response: any, next: any) {
             const args = {
-                query: { "in": "query", "name": "query", "required": true, "dataType": "string" },
-                pageNumber: { "in": "query", "name": "pageNumber", "required": true, "dataType": "double" },
-                perPage: { "in": "query", "name": "perPage", "required": true, "dataType": "double" },
+                page: { "in": "query", "name": "page", "required": true, "dataType": "double" },
+                limit: { "in": "query", "name": "limit", "required": true, "dataType": "double" },
+                fields: { "in": "query", "name": "fields", "dataType": "string" },
+                sort: { "in": "query", "name": "sort", "dataType": "string" },
+                q: { "in": "query", "name": "q", "dataType": "string" },
             };
 
             let validatedArgs: any[] = [];
@@ -72,11 +73,11 @@ export function RegisterRoutes(app: any) {
             const promise = controller.getPaginated.apply(controller, validatedArgs);
             promiseHandler(controller, promise, response, next);
         });
-    app.post('/api/user',
-        authenticateMiddleware([{ "name": "adminUser" }]),
+    app.post('/service/users',
+        authenticateMiddleware([{ "name": "admin" }]),
         function(request: any, response: any, next: any) {
             const args = {
-                userParams: { "in": "body", "name": "userParams", "required": true, "ref": "IUserModel" },
+                body: { "in": "body", "name": "body", "required": true, "ref": "IUserModel" },
             };
 
             let validatedArgs: any[] = [];
@@ -95,12 +96,12 @@ export function RegisterRoutes(app: any) {
             const promise = controller.create.apply(controller, validatedArgs);
             promiseHandler(controller, promise, response, next);
         });
-    app.put('/api/user/:id',
-        authenticateMiddleware([{ "name": "adminUser" }]),
+    app.put('/service/users/:id',
+        authenticateMiddleware([{ "name": "admin" }]),
         function(request: any, response: any, next: any) {
             const args = {
                 id: { "in": "path", "name": "id", "required": true, "dataType": "string" },
-                userParams: { "in": "body", "name": "userParams", "required": true, "ref": "IUserModel" },
+                body: { "in": "body", "name": "body", "required": true, "ref": "IUserModel" },
             };
 
             let validatedArgs: any[] = [];
@@ -119,8 +120,8 @@ export function RegisterRoutes(app: any) {
             const promise = controller.update.apply(controller, validatedArgs);
             promiseHandler(controller, promise, response, next);
         });
-    app.delete('/api/user/:id',
-        authenticateMiddleware([{ "name": "adminUser" }]),
+    app.delete('/service/users/:id',
+        authenticateMiddleware([{ "name": "admin" }]),
         function(request: any, response: any, next: any) {
             const args = {
                 id: { "in": "path", "name": "id", "required": true, "dataType": "string" },
@@ -140,27 +141,6 @@ export function RegisterRoutes(app: any) {
 
 
             const promise = controller.delete.apply(controller, validatedArgs);
-            promiseHandler(controller, promise, response, next);
-        });
-    app.get('/api/ping',
-        function(request: any, response: any, next: any) {
-            const args = {
-            };
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = getValidatedArgs(args, request);
-            } catch (err) {
-                return next(err);
-            }
-
-            const controller = iocContainer.get<PingController>(PingController);
-            if (typeof controller['setStatus'] === 'function') {
-                (<any>controller).setStatus(undefined);
-            }
-
-
-            const promise = controller.ping.apply(controller, validatedArgs);
             promiseHandler(controller, promise, response, next);
         });
 
