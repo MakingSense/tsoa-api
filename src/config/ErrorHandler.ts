@@ -17,7 +17,7 @@ export class ApiError extends Error implements ErrorType {
   constructor(errorType: ErrorType) {
     super(errorType.message);
     this.name = errorType.name;
-    this.statusCode = errorType.statusCode;
+    if (errorType.statusCode) this.statusCode = errorType.statusCode;
     this.fields = errorType.fields;
   }
 }
@@ -30,8 +30,10 @@ export class ErrorHandler {
       `Error: ${statusCode}`,
       `Error Name: ${name}`,
       `Error Message: ${message}`,
-      `Error Fields:`, fields || {});
-    res.status(statusCode).json({ name, message, fields })
+      'Error Fields:', fields || {},
+      'Original Error: ', error
+    );
+    res.status(statusCode).json({ name, message, fields });
     next();
   }
 

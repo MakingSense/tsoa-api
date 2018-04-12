@@ -1,49 +1,61 @@
-import { Route, Controller, Get, Put, Post, Delete, Security, Query, Body, Response } from 'tsoa';
+import {
+  Route,
+  Controller,
+  Get,
+  Put,
+  Post,
+  Delete,
+  Security,
+  Query,
+  Body,
+  Response,
+  Tags
+} from 'tsoa';
 
 import { ProvideSingleton, inject } from '../ioc';
-import { IUserModel, UserModel, PaginationModel } from '../models';
-import { safeParse } from '../utils';
+import { IUserModel, IPaginationModel } from '../models';
 import { UserService } from '../services';
 
-@Route('user')
+@Tags('users')
+@Route('users')
 @ProvideSingleton(UserController)
 export class UserController extends Controller {
-  constructor(@inject(UserService) private userService: UserService) {
+  constructor(@inject(UserService) private service: UserService) {
     super();
   }
 
   @Get('{id}')
   public async getById(id: string): Promise<IUserModel> {
-    return this.userService.getById(id);
+    return this.service.getById(id);
   }
 
   @Get()
   public async getPaginated(
-    @Query('query') query: string,
-    @Query('pageNumber') pageNumber: number,
-    @Query('perPage') perPage: number): Promise<PaginationModel> {
-    return this.userService.getPaginated(safeParse(query, {}), pageNumber, perPage);
+    @Query('page') page: number,
+    @Query('limit') limit: number,
+    @Query('fields') fields?: string,
+    @Query('sort') sort?: string,
+    @Query('q') q?: string): Promise<IPaginationModel> {
+    return this.service.getPaginated(page, limit, fields, sort, q);
   }
 
   @Response(400, 'Bad request')
+  @Security('admin')
   @Post()
-  @Security('adminUser')
-  public async create(@Body() userParams: IUserModel): Promise<IUserModel> {
-    const user = new UserModel(userParams);
-    return this.userService.create(user);
+  public async create(@Body() body: IUserModel): Promise<IUserModel> {
+    return this.service.create(body);
   }
 
   @Response(400, 'Bad request')
+  @Security('admin')
   @Put('{id}')
-  @Security('adminUser')
-  public async update(id: string, @Body() userParams: IUserModel): Promise<{ count: number }> {
-    const user = new UserModel(userParams);
-    return this.userService.update(id, user);
+  public async update(id: string, @Body() body: IUserModel): Promise<IUserModel> {
+    return this.service.update(id, body);
   }
 
+  @Security('admin')
   @Delete('{id}')
-  @Security('adminUser')
   public async delete(id: string): Promise<void> {
-    return this.userService.delete(id);
+    return this.service.delete(id);
   }
 }

@@ -1,2 +1,2 @@
-export * from './userModel';
-export * from './paginationModel';
+export * from './UserModel';
+export * from './PaginationModel';

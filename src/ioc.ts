@@ -1,7 +1,7 @@
 import { Controller } from 'tsoa';
 import { Container, inject, interfaces, decorate, injectable } from 'inversify';
 import { autoProvide, makeProvideDecorator, makeFluentProvideDecorator } from 'inversify-binding-decorators';
-import "reflect-metadata";
+import 'reflect-metadata';
 
 decorate(injectable(), Controller);
 

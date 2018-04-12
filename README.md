@@ -4,7 +4,9 @@
 * * [inversify](https://www.npmjs.com/package/inversify) `inversion of controll / dependency injection`
 * * [swagger-ui-express](https://www.npmjs.com/package/swagger-ui-express)
 * * [mongoose](https://www.npmjs.com/package/mongoose) `MongoDB ORM`
-* * mocha, chai, supertest `unit and integration testing`
+* * [sequelize](https://www.npmjs.com/package/sequelize) `SQL ORM`
+* * [mocha](https://www.npmjs.com/package/mocha), [chai](https://www.npmjs.com/package/chai), [supertest](https://www.npmjs.com/package/supertest), [sinon](https://www.npmjs.com/package/sinon) `unit and integration testing`
+
 ## Swagger
 * `<url>/api-docs`
 
@@ -65,12 +67,13 @@ export class PingController extends Controller {
 }
 ```
 
-### Model
-* Models are used for 4 reasons:
+### Models and Formatters
+* Models and Formatters are used for 4 reasons:
+
+#### Model
 * * **Swagger** definition file
 * * Run time validations performed by **tsoa**
 * * Static typing advantages
-* * Data normalization
 ```typescript
 /** An interface used for swagger, run time validations and standar typescript advantages */
 export interface IUserModel {
@@ -79,22 +82,22 @@ export interface IUserModel {
   firstName: string;
   lastName: string;
 }
+```
 
+#### Formatter
+* * Data normalization
+```typescript
 /** A class used to normalize data */
-export class UserModel implements IUserModel {
-  public id: string = null;
-  public username: string = null;
-  public firstName: string = null;
-  public lastName: string = null;
+export class UserFormatter extends BaseFormatter implements IUserModel {
+  public username: string = undefined;
+  public firstName: string = undefined;
+  public lastName: string = undefined;
 
   constructor(args: any) {
-    if (!args) throw new Error('no data');
-    Object.keys(this).forEach(key => {
-      if (args[key] !== undefined) this[key] = args[key];
-    });
+    super();
+    this.format(args);
   }
 }
-
 ```
 
 ### Auth
@@ -152,6 +155,134 @@ export class UserService {
   }
 }
 ```
+
+### Repositories
+* Repositories handle the access to data layers
+
+#### Mongo Repository 
+```typescript
+@ProvideSingleton(UserService)
+import { Schema, Model } from 'mongoose';
+
+import { BaseRepository } from './BaseRepository';
+import { ProvideSingleton, inject } from '../../ioc';
+import { MongoDbConnection } from '../../config/MongoDbConnection';
+import { ICaseModel, CaseFormatter } from '../../models';
+
+@ProvideSingleton(CaseRepository)
+export class CaseRepository extends BaseRepository<ICaseModel> {
+  protected modelName: string = 'cases';
+  protected schema: Schema = new Schema({
+    name: { type: String, required: true },
+    createdBy: { type: String, required: true }
+  });
+  protected formatter = CaseFormatter;
+  constructor(@inject(MongoDbConnection) protected dbConnection: MongoDbConnection) {
+    super();
+    super.init();
+  }
+}
+```
+
+#### SQL Repository 
+```typescript
+import { ProvideSingleton, inject } from '../../ioc';
+import { BaseRepository } from './BaseRepository';
+import { ICaseModel, CaseFormatter } from '../../models';
+import { CaseEntity } from './entities';
+
+@ProvideSingleton(CaseRepository)
+export class CaseRepository extends BaseRepository<ICaseModel> {
+  protected formatter: any = CaseFormatter;
+
+  constructor(@inject(CaseEntity) protected entityModel: CaseEntity) {
+    super();
+  }
+}
+```
+
+#### SQL Entity
+* * Sequelize definition to be used by SQL repositories
+```typescript
+import * as Sequelize from 'sequelize';
+
+import { ProvideSingleton, inject } from '../../../ioc';
+import { SQLDbConnection } from '../../../config/SQLDbConnection';
+import { BaseEntity } from './BaseEntity';
+
+@ProvideSingleton(CaseEntity)
+export class CaseEntity extends BaseEntity {
+  /** table name */
+  public entityName: string = 'case';
+  /** table definition */  
+  protected attributes: Sequelize.DefineAttributes = {
+    _id: { type: Sequelize.UUID, primaryKey: true, defaultValue: Sequelize.UUIDV4 },
+    name: { type: Sequelize.STRING, allowNull: false, unique: true },
+    createdBy: { type: Sequelize.STRING, allowNull: false }
+  };
+  protected options: Sequelize.DefineOptions<any> = { name: { plural: 'cases' } };
+
+  constructor(@inject(SQLDbConnection) protected sqlDbConnection: SQLDbConnection) {
+    super();
+    this.initModel();
+  }
+}
+```
+
+#### SQL Migrations
+* * Migrations are swritten on regular JS. When the server run for the first time it will sync all models into tables. When an update on a model is needed, the `Entity` on `src/repositories/sql/entities` will have to be updated and a migration file created and run with the provided npm script `migrate:<env>` to update the already created table.
+```typescript
+'use strict';
+module.exports = {
+  up: (queryInterface, Sequelize) => {
+    return Promise.all([
+      // queryInterface.addColumn('users', 'fakeColumn', Sequelize.STRING)
+    ]);
+  },
+  down: (queryInterface, Sequelize) => {
+    return Promise.all([
+      // queryInterface.removeColumn('users', 'fakeColumn')
+    ]);
+  }
+};
+
+```
+
+#### Sync
+* * To sync all entities when the server/tests start, tou will have to inject their dependencies into `SQLSetupHelper` class localted at `src/config/SQLSetupHelper`
+```typescript
+import * as Sequelize from 'sequelize';
+
+import constants from './constants';
+import { Logger } from './Logger';
+import { ProvideSingleton, inject } from '../ioc';
+import { SQLDbConnection } from './SQLDbConnection';
+import * as entities from '../repositories/sql/entities';
+
+@ProvideSingleton(SQLSetupHelper)
+export class SQLSetupHelper {
+
+  constructor(
+    @inject(SQLDbConnection) private sqlDbConnection: SQLDbConnection,
+    @inject(entities.UserEntity) private entity1: entities.UserEntity,
+    @inject(entities.CaseEntity) private entity2: entities.CaseEntity
+  ) { }
+
+  public async rawQuery<T>(query: string): Promise<T> {
+    return this.sqlDbConnection.db.query(query, { raw: true });
+  }
+
+  public async sync(options?: Sequelize.SyncOptions): Promise<void> {
+    await this.sqlDbConnection.db.authenticate();
+    if (constants.SQL.dialect === 'mysql') await this.rawQuery('SET FOREIGN_KEY_CHECKS = 0');
+    Logger.log(
+      `synchronizing: tables${options ? ` with options: ${JSON.stringify(options)}` : ''}`
+    );
+    await this.sqlDbConnection.db.sync(options);
+  }
+}
+```
+
 
 ### Test
 * Tests include **unit tests** `(utils and services)` and **integration tests**.
