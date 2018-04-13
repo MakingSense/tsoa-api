@@ -1,11 +1,10 @@
-import { iocContainer } from '../src/ioc';
-import { UserRepository } from '../src/repositories/mongo/UserRepository';
+import { iocContainer } from '../ioc';
+import { Logger } from '../config/Logger';
+import { UserRepository } from '../repositories/mongo/UserRepository';
 
 const userRepository = iocContainer.get<UserRepository>(UserRepository);
 
 (async () => {
-  console.log('== mongo: migrating =======');
-  console.time('== mongo: migrated =======');
   const users = [
     {
       email: 'dgeslin@makingsense.com',
@@ -18,9 +17,15 @@ const userRepository = iocContainer.get<UserRepository>(UserRepository);
       lastname: 'Geslin'
     }
   ];
-  
-  await Promise.all(users.map(u => userRepository.create(u)));
 
-  console.timeEnd('== mongo: migrated =======');
+  try {
+    Logger.log('migrating MONGO');
+    const prevIds = await userRepository.find(0, 1000, '', { email: users.map(u => u.email) });
+    await Promise.all(prevIds.map(p => userRepository.delete(p._id)));
+    await Promise.all(users.map(u => userRepository.create(u)));
+  } catch (e) {
+    Logger.error(e);
+    process.exit(1);
+  }
   process.exit();
 })();

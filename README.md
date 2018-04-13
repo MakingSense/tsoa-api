@@ -230,22 +230,22 @@ export class CaseEntity extends BaseEntity {
 ```
 
 #### SQL Migrations
-* * Migrations are swritten on regular JS. When the server run for the first time it will sync all models into tables. When an update on a model is needed, the `Entity` on `src/repositories/sql/entities` will have to be updated and a migration file created and run with the provided npm script `migrate:<env>` to update the already created table.
+* * When an update on a model is needed, the `Entity` on `src/repositories/sql/entities` will have to be updated and a migration file created and run with the provided npm script `migrate:<env>` to update the already created table.
 ```typescript
-'use strict';
-module.exports = {
-  up: (queryInterface, Sequelize) => {
+import * as Sequelize from 'sequelize';
+
+export default {
+  up: async (queryInterface: Sequelize.QueryInterface) => {
     return Promise.all([
       // queryInterface.addColumn('users', 'fakeColumn', Sequelize.STRING)
     ]);
   },
-  down: (queryInterface, Sequelize) => {
+  down: async (queryInterface: Sequelize.QueryInterface) => {
     return Promise.all([
       // queryInterface.removeColumn('users', 'fakeColumn')
     ]);
   }
 };
-
 ```
 
 #### Sync
