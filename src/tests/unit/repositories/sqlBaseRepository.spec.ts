@@ -95,4 +95,31 @@ describe('SQL BaseRepository', () => {
     await repository.count(`{"_id":"${_id}"}`);
     expect(countStub.calledWith({ where: { _id: { [Sequelize.Op.eq]: _id } } })).to.be.true; // tslint:disable-line
   });
+
+  it('should clean to save', async () => {
+    expect((repository as any).cleanToSave({ a: 1 })).to.be.an.instanceof(Formatter);
+  });
+
+  it('should format a sort query', async () => {
+    expect((repository as any).sortQueryFormatter(null, 'asc')).to.equal('asc');
+    expect((repository as any).sortQueryFormatter(null, 'desc')).to.equal('desc');
+    expect((repository as any).sortQueryFormatter(null, 'invalid')).to.equal(undefined);
+  });
+
+  it('should clean a sort query', async () => {
+    expect((repository as any).cleanSort('{"name":"asc"}')).to.deep.equal({ name: 'asc' });
+  });
+
+  it('should format a where query', async () => {
+    const fn = (repository as any).whereQueryFormatter;
+    expect(fn('a', [])).to.deep.equal({ [Sequelize.Op.or]: [] });
+    expect(fn('id', 'a')).to.deep.equal({ [Sequelize.Op.eq]: 'a' });
+    expect(fn('a', 'a')).to.deep.equal({ [Sequelize.Op.like]: '%a%' });
+    expect(fn('a', 5)).to.deep.equal({ [Sequelize.Op.like]: 5 });
+  });
+
+  it('should clean a where query', async () => {
+    const fn = (repository as any).cleanWhere.bind(repository);
+    expect(fn(JSON.stringify({ name: 'a' }))).to.deep.equal({ name: { [Sequelize.Op.like]: '%a%' } });
+  });
 });

@@ -1,12 +1,17 @@
 {
-  "name": "tsoa-api",
+  "name": "opya-backend",
   "version": "1.0.0",
   "description": "",
   "main": "",
+  "pre-commit": [
+    "lint",
+    "test:unit"
+  ],
   "scripts": {
     "test": "yarn lint && yarn test:unit && yarn test:integration",
-    "test:unit": "yarn env:test mocha -r ts-node/register ./src/tests/unit/**/*.spec.ts",
+    "test:unit": "yarn env:test nyc mocha --timeout 10000 -r ts-node/register ./src/tests/unit/**/*.spec.ts",
     "test:integration": "yarn build:tsoa && yarn env:test mocha --timeout 35000 -r ts-node/register ./src/tests/integration/**/*.spec.ts --exit",
+    "test:coverage": "yarn test:unit && google-chrome ./coverage/index.html",
     "start": "yarn start:dev",
     "start:dev": "yarn build:tsoa && yarn env:dev ts-node-dev --respawn ./src",
     "start:prod": "yarn env:prod node ./dist/src/index.js",
@@ -23,19 +28,16 @@
     "env:dev": "cross-env NODE_ENV=development",
     "env:test": "cross-env NODE_ENV=test",
     "env:prod": "cross-env NODE_ENV=production",
-    "sequelize:dev": "yarn env:dev sequelize",
-    "sequelize:test": "yarn env:test sequelize",
-    "sequelize:prod": "yarn env:prod sequelize",
-    "migrate:dev": "yarn sequelize:dev db:migrate",
-    "migrate:undo:dev": "yarn sequelize:dev db:migrate:undo",
-    "migrate:prod": "yarn sequelize:prod db:migrate",
-    "migrate:undo:prod": "yarn sequelize:prod db:migrate:undo",
-    "seed:sql:dev": "yarn sequelize:dev db:seed:all",
-    "seed:sql:undo:dev": "yarn sequelize:dev db:seed:undo:all",
-    "seed:sql:prod": "yarn sequelize:prod db:seed",
-    "seed:sql:undo:prod": "yarn sequelize:prod db:migrate:undo:all",
-    "seed:mongo:dev": "yarn env:dev ts-node ./mongo-seeders/seeds.ts --exit",
-    "seed:mongo:prod": "yarn env:prod ts-node ./mongo-seeders/seeds.ts --exit"
+    "migrate:dev": "yarn env:dev cross-env MIGRATION_DIRECTION=up cross-env MIGRATION_ACTION=migrations ts-node ./src/setup/migrateSql.ts --exit",
+    "migrate:undo:dev": "yarn env:dev cross-env MIGRATION_DIRECTION=down MIGRATION_ACTION=migrations ts-node ./src/setup/migrateSql.ts --exit",
+    "migrate:prod": "yarn env:prod cross-env MIGRATION_DIRECTION=up MIGRATION_ACTION=migrations ts-node ./src/setup/migrateSql.ts --exit",
+    "migrate:undo:prod": "yarn env:prod cross-env MIGRATION_DIRECTION=down MIGRATION_ACTION=migrations ts-node ./src/setup/migrateSql.ts --exit",
+    "seed:sql:dev": "yarn env:dev cross-env MIGRATION_DIRECTION=up cross-env MIGRATION_ACTION=sql-seeders ts-node ./src/setup/migrateSql.ts --exit",
+    "seed:sql:undo:dev": "yarn env:dev cross-env MIGRATION_DIRECTION=down cross-env MIGRATION_ACTION=sql-seeders ts-node ./src/setup/migrateSql.ts --exit",
+    "seed:sql:prod": "yarn env:prod cross-env MIGRATION_DIRECTION=up cross-env MIGRATION_ACTION=sql-seeders ts-node ./src/setup/migrateSql.ts --exit",
+    "seed:sql:undo:prod": "yarn env:prod cross-env MIGRATION_DIRECTION=down cross-env MIGRATION_ACTION=sql-seeders ts-node ./src/setup/migrateSql.ts --exit",
+    "seed:mongo:dev": "yarn env:dev ts-node ./src/setup/seedMongo.ts --exit",
+    "seed:mongo:prod": "yarn env:prod ts-node ./src/setup/seedMongo.ts --exit"
   },
   "author": "Daniel Isaac Geslin <dgeslin@makingsense.com> (https://www.linkedin.com/in/danielisaacgeslin/)",
   "license": "ISC",
@@ -62,6 +64,7 @@
     "sinon": "^4.5.0",
     "swagger-ui-express": "^3.0.6",
     "tsoa": "^2.1.4",
+    "umzug": "^2.1.0",
     "uuid": "^3.2.1",
     "winston": "^3.0.0-rc4"
   },
@@ -83,10 +86,14 @@
     "@types/sequelize": "^4.27.13",
     "@types/sinon": "^4.3.1",
     "@types/supertest": "^2.0.4",
+    "@types/umzug": "^2.1.1",
+    "@types/uuid": "^3.4.3",
     "chai": "^4.1.2",
     "colors": "^1.2.1",
     "cross-env": "^5.1.4",
     "mocha": "^5.0.5",
+    "nyc": "^11.6.0",
+    "pre-commit": "^1.2.2",
     "randomstring": "^1.1.5",
     "supertest": "^3.0.0",
     "ts-node": "^5.0.1",
@@ -94,5 +101,33 @@
     "tslint": "^5.9.1",
     "typescript": "^2.8.1",
     "yarn": "^1.5.1"
+  },
+  "nyc": {
+    "include": [
+      "src/**/*.ts"
+    ],
+    "sourceMap": true,
+    "instrument": true,
+    "all": false,
+    "exclude": [
+      "src/tests/**",
+      "src/ioc.ts",
+      "src/setup/**",
+      "src/config/MongoDbConnection.ts",
+      "src/config/SQLDbConnection.ts",
+      "src/models/*Model.ts",
+      "src/repositories/sql/entities/**"
+    ],
+    "extension": [
+      ".ts"
+    ],
+    "require": [
+      "ts-node/register"
+    ],
+    "reporter": [
+      "text",
+      "text-summary",
+      "html"
+    ]
   }
 }
