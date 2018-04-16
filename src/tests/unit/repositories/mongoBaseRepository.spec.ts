@@ -12,6 +12,8 @@ class Formatter extends Object { }
 
 class BaseRepositoryExtension extends BaseRepository<any> {
   public documentModel: any;
+  public dbConnection: any = { db: { model: stub() } };
+  public schema: any = { plugin: stub() };
   protected formatter = Formatter;
   constructor(customStub?: SinonStub) {
     super();
@@ -25,6 +27,13 @@ describe('Mongo BaseRepository', () => {
   beforeEach(() => {
     repository = new BaseRepositoryExtension();
     cleanToSaveSpy = spy(repository, 'cleanToSave' as any);
+  });
+
+  it('should init one time', async () => {
+    (repository as any).init();
+    (repository as any).init();
+    expect(repository.dbConnection.db.model.calledOnce).to.be.true; // tslint:disable-line
+    expect(repository.schema.plugin.calledOnce).to.be.true; // tslint:disable-line
   });
 
   it('should create', async () => {
@@ -91,4 +100,22 @@ describe('Mongo BaseRepository', () => {
     await repository.count(`{"_id":"${_id}"}`);
     expect(countStub.calledWith({ _id })).to.be.true; // tslint:disable-line
   });
+
+  it('should clean to save', async () => {
+    expect((repository as any).cleanToSave({ a: 1 })).to.be.an.instanceof(Formatter);
+  });
+
+  it('should format a sort query', async () => {
+    expect((repository as any).sortQueryFormatter(null, 'asc')).to.equal(1);
+    expect((repository as any).sortQueryFormatter(null, 'desc')).to.equal(-1);
+  });
+
+  it('should format a where query', async () => {
+    const fn = (repository as any).cleanWhereQuery;
+    expect(fn(null)).to.deep.equal({});
+    expect(fn('')).to.deep.equal({});
+    expect(fn({ name: 'a', desc: ['a'] })).to.deep.equal({ name: 'a', $or: [{ desc: 'a' }] });
+    expect(fn({ name: 'a' })).to.deep.equal({ name: 'a' });
+  });
+
 });

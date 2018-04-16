@@ -12,6 +12,9 @@ describe('Immutability Helper', () => {
     expect(ImmutabilityHelper.getType(null)).to.equal('null');
     expect(ImmutabilityHelper.getType(undefined)).to.equal('undefined');
   });
+  it('should return an error', async () => {
+    expect(() => new ImmutabilityHelper()).to.throw(Error, 'just don\'t...');
+  });
   it('"immute" should clone a variable', async () => {
     const shallow = { a: 1 };
     const copy = ImmutabilityHelper.immute<any>(shallow);

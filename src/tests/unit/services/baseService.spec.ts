@@ -25,7 +25,7 @@ describe('BaseService', () => {
     expect(res).to.have.property('limit');
     expect(res).to.have.property('totalPages');
     expect(res).to.have.property('docs');
-    expect(res.docs).to.have.length; // tslint:disable-line
+    expect(res.docs).to.have.length.greaterThan(0);
   });
 
   it('should getById', async () => {
