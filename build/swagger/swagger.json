@@ -7,10 +7,12 @@
 		"IUserModel": {
 			"properties": {
 				"_id": {
-					"type": "string"
+					"type": "string",
+					"x-nullable": true
 				},
 				"id": {
-					"type": "string"
+					"type": "string",
+					"x-nullable": true
 				},
 				"email": {
 					"type": "string"

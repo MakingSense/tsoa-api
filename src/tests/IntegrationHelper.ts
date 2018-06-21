@@ -19,7 +19,7 @@ export class IntegrationHelper {
   public messagePath: string = `${this.rootPath}/messages`;
 
   public static setup(): void {
-    it('SQL DB', async () => {
+    xit('SQL DB', async () => {
       const sqlHelper = iocContainer.get<SQLSetupHelper>(SQLSetupHelper);
       await sqlHelper.sync({ force: true });
       expect(1).to.equal(1);
