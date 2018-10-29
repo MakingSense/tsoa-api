@@ -39,7 +39,7 @@
     "seed:mongo:dev": "yarn env:dev ts-node ./src/setup/seedMongo.ts --exit",
     "seed:mongo:prod": "yarn env:prod ts-node ./src/setup/seedMongo.ts --exit"
   },
-  "author": "Daniel Isaac Geslin <dgeslin@makingsense.com> (https://www.linkedin.com/in/danielisaacgeslin/)",
+  "author": "Making Sense <servicesdevs@makingsense.com>",
   "license": "ISC",
   "dependencies": {
     "auth0": "^2.9.1",
